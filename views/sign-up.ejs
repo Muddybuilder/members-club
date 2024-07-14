@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title></title>
+  </head>
+  <body>
+    <h1>Sign Up</h1>
+    <form action="/sign-up" method="POST">
+      <label for="username">Username</label>
+      <input name="username" placeholder="username" type="text" />
+      <label for="password">Password</label>
+      <input name="password" type="password" />
+      <label for="confirmpwd">Confirm Password</label>
+      <input name="confirmpwd" type="password" />
+      <label for="fname">First Name</label>
+      <input name="fname" type="text" />
+      <label for="lname">Last Name</label>
+      <input name="lname" type="text" />
+      <button>Sign Up</button>
+    </form>
+    <% if (errors){%>
+    <ul>
+      <% errors.forEach(error=>{ %>
+      <li><%= error.msg %></li>
+      <% })%>
+    </ul>
+    <%}%>
+  </body>
+</html>
