@@ -18,7 +18,7 @@ main().catch((err) => console.log(err));
 async function main() {
   await mongoose.connect(mongoDB);
 }
-
+//TODO: make session store
 var app = express();
 app.set("view engine", "ejs");
 app.use(
