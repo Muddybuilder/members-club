@@ -7,7 +7,23 @@
 <body>
   <% if (currentUser != undefined) {%>
     <h1>WELCOME BACK <%= currentUser.first_name %>!</h1>
-    <a href="/log-out">LOG OUT</a>
+    <div><a href="/log-out">LOG OUT</a></div>
+    <div><a href="/message">Create a new message</a></div>
+    <p>You're secret membership status: <%=isMember?"Member 🎩":"Not a member ❌" %></p>
+    <% if (!isMember){%>
+      <a href="/join-club">Join the secret club</a>
+    <%}%>
+    <h2>Member message board</h2>
+    <ul>
+      <% msgList.forEach(msg => { %>
+        <%if (isMember){%>
+          <li><%= `${msg.message} from ${msg.user} on ${msg.date}`%></li>
+          <%}else{%>
+            <li><%= `${msg.message} - anon`%></li>
+            <%}%>
+      <%});%>
+          
+    </ul>
   <% } else { %>
     <h1>please log in</h1>
     <form action="/log-in" method="POST">

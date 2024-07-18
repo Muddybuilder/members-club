@@ -17,11 +17,12 @@ const mongoDB = process.env.DB_STRING;
 
 main().catch((err) => console.log(err));
 async function main() {
-  await mongoose.connect(mongoDB);
+  await mongoose.connect(mongoDB, { dbName: "members" });
 }
 // const connection = mongoose.createConnection(process.env.DB_STRING);
 const sessionStore = MongoStore.create({
   mongoUrl: process.env.SESSION_STORE,
+  dbName: "sessions"
 });
 var app = express();
 app.set("view engine", "ejs");
@@ -44,11 +45,18 @@ app.use(passport.session());
 app.use(express.static(path.join(__dirname, "public")));
 app.use((req, res, next) => {
   res.locals.currentUser = req.user;
+  res.locals.isMember = req.user?.is_member;
   next();
 });
 
+const MESSAGES = [];
 app.get("/", (req, res) => {
-  res.render("index");
+  if (req.isAuthenticated()) {
+    res.render("index", { msgList: MESSAGES });
+  }
+  else {
+    res.render("index", { msgList: MESSAGES });
+  }
 });
 
 app.get("/sign-up", (req, res) => res.render("sign-up", { errors: null }));
@@ -92,6 +100,7 @@ app.post(
           password: hashedPassword,
           first_name: req.body.fname,
           family_name: req.body.lname,
+          is_member: false
         });
         const result = await user.save();
         res.redirect("/");
@@ -101,6 +110,39 @@ app.post(
     });
   }
 );
+
+app.get("/join-club", (req, res) => res.render("join-club", { errors: null }))
+
+app.post("/join-club", (req, res) => {
+  if (req.isUnauthenticated()) {
+    res.render("join-club", { errors: [{ msg: "Sign in first!" }] })
+  } else {
+    if (req.body.code == "secret_code") {
+      user = req.user;
+      user.is_member = true;
+      user.save()
+      res.redirect("/");
+    }
+    else {
+      res.render("join-club", { errors: [{ msg: "Wrong code!" }] })
+    }
+  }
+
+})
+
+app.get("/message", (req, res) => res.render("message", { errors: null }))
+
+app.post("/message", (req, res) => {
+  if (req.isUnauthenticated()) {
+    res.render("/message", { errors: [{ msg: "Sign in first!" }] })
+  } else {
+    user = req.user;
+    msg = { user: user.first_name, message: req.body.msg, date: (new Date()).toDateString() }
+    MESSAGES.push(msg)
+    res.redirect("/")
+  }
+
+})
 
 passport.use(
   new LocalStrategy(async (username, password, done) => {
